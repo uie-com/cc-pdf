@@ -74,7 +74,6 @@ export async function POST(req: NextRequest) {
     }
 
     let newUrl = '', originalName = name;
-    url = normalizeUrl(url);
     name = normalizeName(name);
 
     const airtableGetRes = await fetch(`https://api.airtable.com/v0/appq2AtsGzJm1CZJZ/tblGbefx3uho1OpkW?filterByFormula=${encodeURIComponent(`{Name} = "${name}"`)}`, {
