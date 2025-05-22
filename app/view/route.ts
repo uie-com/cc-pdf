@@ -73,6 +73,7 @@ export async function POST(req: NextRequest) {
         return new Response(null, { status: 400 });
     }
 
+    let newUrl = '', originalName = name;
     url = normalizeUrl(url);
     name = normalizeName(name);
 
@@ -105,6 +106,18 @@ export async function POST(req: NextRequest) {
         if (!airtableUpdateRes.ok) {
             return new Response(null, { status: 500 });
         }
+        newUrl = process.env.PUBLIC_URL + '?q=' + name;
+
+
+        await fetch(process.env.EDIT_WEBHOOK_URL ?? '', {
+            method: 'POST',
+            headers: {},
+            body: JSON.stringify({
+                name: originalName,
+                doc: url,
+                url: newUrl,
+            })
+        });
     } else {
         const airtableRes = await fetch('https://api.airtable.com/v0/appq2AtsGzJm1CZJZ/tblGbefx3uho1OpkW', {
             method: 'POST',
@@ -118,9 +131,20 @@ export async function POST(req: NextRequest) {
         if (!airtableRes.ok) {
             return new Response(null, { status: 500 });
         }
+
+        newUrl = process.env.PUBLIC_URL + '?q=' + name;
+
+        await fetch(process.env.CREATE_WEBHOOK_URL ?? '', {
+            method: 'POST',
+            headers: {},
+            body: JSON.stringify({
+                name: originalName,
+                doc: url,
+                url: newUrl,
+            })
+        });
     }
 
-    const newUrl = process.env.PUBLIC_URL + '?q=' + name;
 
     console.log('Created PDF link for ' + name + ' at URL: ' + newUrl);
 
