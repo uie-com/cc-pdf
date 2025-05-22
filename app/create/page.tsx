@@ -57,7 +57,7 @@ export default function Page() {
 
                     <Button size='md' onClick={tryPost} className=" bg-gray-400 cursor-pointer rounded-md text-white mt-4" loading={status === 'loading'} color={status === 'error' ? 'orange.4' : status === 'success' ? 'green' : 'blue'}>{status === 'error' ? 'Error Creating Link' : status === 'success' ? 'Copied Link to Clipboard' : 'Create Link'}</Button>
 
-                    <Anchor className=" alifn" href="https://centercentre.slack.com/archives/C08TNR13R98"><Text c='gray.5' className="!text-sm !-mb-2">See Links in the Slack channel #pdf_links.</Text></Anchor>
+                    <Anchor target="_blank" href="https://centercentre.slack.com/archives/C08TNR13R98"><Text c='gray.5' className="!text-sm !-mb-2">See Links in the Slack channel #pdf_links.</Text></Anchor>
 
                 </Flex>
             </div>
