@@ -1,36 +1,68 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PDF Wrapper API
+
+A simple API that accepts a Google Docs URL and a name, stores the mapping, and returns a direct PDF link for each document.
+
+## Features
+
+- Store and update mappings of document names to Google Docs URLs
+- Automatically generates a direct PDF link for each document
+- Retrieve the PDF by name
 
 ## Getting Started
 
-First, run the development server:
+### Installation
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/yourusername/cc-pdf.git
+cd cc-pdf
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Running the API
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm start
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The API will be available at `http://localhost:3000`.
 
-## Learn More
+## Usage
 
-To learn more about Next.js, take a look at the following resources:
+### Create or Update a Document Link
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Send a `POST` request to `/view` with a JSON body:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+curl -X POST http://localhost:3000/view \
+  -H "Content-Type: application/json" \
+  -d '{"name": "My Document", "url": "https://docs.google.com/document/d/your-doc-id/edit"}'
+```
 
-## Deploy on Vercel
+#### Response
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```json
+{
+  "url": "http://localhost:3000/view?q=my-document"
+}
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Retrieve a PDF by Name
+
+Send a `GET` request to `/view?q=my-document`:
+
+```bash
+curl -o my-document.pdf "http://localhost:3000/view?q=my-document"
+```
+
+If found, the PDF will be returned as a file.
+
+## API Endpoints
+
+| Method | Endpoint   | Description                          |
+|--------|------------|--------------------------------------|
+| POST   | `/view`    | Create or update a document mapping  |
+| GET    | `/view`    | Retrieve PDF by name (`?q=name`)     |
+
+## License
+
+MIT
