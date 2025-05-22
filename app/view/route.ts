@@ -65,7 +65,9 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-    let { url, name } = await req.json();
+    let { url, name, message } = await req.json();
+    if (!message)
+        message = true;
 
     console.log('Creating PDF link for ' + name + ' at URL: ' + url);
 
@@ -107,16 +109,16 @@ export async function POST(req: NextRequest) {
         }
         newUrl = process.env.PUBLIC_URL + '?q=' + name;
 
-
-        await fetch(process.env.EDIT_WEBHOOK_URL ?? '', {
-            method: 'POST',
-            headers: {},
-            body: JSON.stringify({
-                name: originalName,
-                doc: url,
-                url: newUrl,
-            })
-        });
+        if (message)
+            await fetch(process.env.EDIT_WEBHOOK_URL ?? '', {
+                method: 'POST',
+                headers: {},
+                body: JSON.stringify({
+                    name: originalName,
+                    doc: url,
+                    url: newUrl,
+                })
+            });
     } else {
         const airtableRes = await fetch('https://api.airtable.com/v0/appq2AtsGzJm1CZJZ/tblGbefx3uho1OpkW', {
             method: 'POST',
@@ -133,15 +135,16 @@ export async function POST(req: NextRequest) {
 
         newUrl = process.env.PUBLIC_URL + '?q=' + name;
 
-        await fetch(process.env.CREATE_WEBHOOK_URL ?? '', {
-            method: 'POST',
-            headers: {},
-            body: JSON.stringify({
-                name: originalName,
-                doc: url,
-                url: newUrl,
-            })
-        });
+        if (message)
+            await fetch(process.env.CREATE_WEBHOOK_URL ?? '', {
+                method: 'POST',
+                headers: {},
+                body: JSON.stringify({
+                    name: originalName,
+                    doc: url,
+                    url: newUrl,
+                })
+            });
     }
 
 
