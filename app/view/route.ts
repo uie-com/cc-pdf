@@ -120,7 +120,7 @@ export async function POST(req: NextRequest) {
         }
     }
 
-    const newUrl = process.env.URL + '?q=' + name;
+    const newUrl = process.env.PUBLIC_URL + '?q=' + name;
 
     console.log('Created PDF link for ' + name + ' at URL: ' + newUrl);
 
