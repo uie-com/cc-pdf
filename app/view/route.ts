@@ -1,13 +1,16 @@
 import { headers } from "next/headers"
+import { redirect } from "next/navigation";
 import { NextRequest } from "next/server"
 
 export async function GET(req: NextRequest) {
+
     let name = req.nextUrl.searchParams.get('q');
 
     console.log('Fetching PDF link for ' + name);
 
     if (!name || name.length < 2) {
-        return new Response(null, { status: 404 });
+        console.log('[ERROR] Invalid doc name: ' + name);
+        redirect('https://centercentre.com/');
     }
 
     name = normalizeName(name);
@@ -22,11 +25,13 @@ export async function GET(req: NextRequest) {
     });
 
     if (!airtableRes.ok) {
-        return new Response(null, { status: 500 });
+        console.log('[ERROR] Failed to fetch from Airtable: ' + airtableRes.status);
+        redirect('https://centercentre.com/');
     }
     const airtableData = await airtableRes.json();
     if (!airtableData.records || airtableData.records.length === 0) {
-        return new Response(null, { status: 404 });
+        console.log('[ERROR] No records found for doc: ' + name);
+        redirect('https://centercentre.com/');
     }
 
     const record = airtableData.records[0];
@@ -34,7 +39,8 @@ export async function GET(req: NextRequest) {
     let { 'Docs URL': url } = fields;
 
     if (!url) {
-        return new Response(null, { status: 404 });
+        console.log('[ERROR] No URL found for doc: ' + name);
+        redirect('https://centercentre.com/');
     }
 
     url = normalizeUrl(url);
@@ -55,6 +61,8 @@ export async function GET(req: NextRequest) {
     const pdfBlob = new Blob([pdf], { type: 'application/pdf' })
 
     const pdfUrl = URL.createObjectURL(pdfBlob);
+
+    console.log('[GET] PDF URL: ' + pdfUrl);
     return new Response(pdf, {
         status: 200,
         headers: {
@@ -72,7 +80,8 @@ export async function POST(req: NextRequest) {
     console.log('Creating PDF link for ' + name + ' at URL: ' + url);
 
     if (!url || !name) {
-        return new Response(null, { status: 400 });
+        console.log('[ERROR] Invalid doc name or URL: ' + name + ' ' + url);
+        redirect('https://centercentre.com/');
     }
 
     let newUrl = '', originalName = name;
@@ -87,7 +96,8 @@ export async function POST(req: NextRequest) {
     });
 
     if (!airtableGetRes.ok) {
-        return new Response(null, { status: 500 });
+        console.log('[ERROR] Failed to fetch from Airtable: ' + airtableGetRes.status);
+        redirect('https://centercentre.com/');
     }
 
     const airtableGetData = await airtableGetRes.json();
@@ -105,7 +115,8 @@ export async function POST(req: NextRequest) {
         })
 
         if (!airtableUpdateRes.ok) {
-            return new Response(null, { status: 500 });
+            console.log('[ERROR] Failed to update Airtable: ' + airtableUpdateRes.status);
+            redirect('https://centercentre.com/');
         }
         newUrl = process.env.PUBLIC_URL + '?q=' + name;
 
@@ -130,7 +141,8 @@ export async function POST(req: NextRequest) {
         });
 
         if (!airtableRes.ok) {
-            return new Response(null, { status: 500 });
+            console.log('[ERROR] Failed to create Airtable record: ' + airtableRes.status);
+            redirect('https://centercentre.com/');
         }
 
         newUrl = process.env.PUBLIC_URL + '?q=' + name;
@@ -148,7 +160,7 @@ export async function POST(req: NextRequest) {
     }
 
 
-    console.log('Created PDF link for ' + name + ' at URL: ' + newUrl);
+    console.log('[POST] Created PDF link for ' + name + ' at URL: ' + newUrl);
 
     return new Response(JSON.stringify({ url: newUrl }), {
         status: 200,
