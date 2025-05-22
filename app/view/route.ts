@@ -109,7 +109,7 @@ export async function POST(req: NextRequest) {
         }
         newUrl = process.env.PUBLIC_URL + '?q=' + name;
 
-        if (message)
+        if (message && message !== 'false')
             await fetch(process.env.EDIT_WEBHOOK_URL ?? '', {
                 method: 'POST',
                 headers: {},
@@ -135,7 +135,7 @@ export async function POST(req: NextRequest) {
 
         newUrl = process.env.PUBLIC_URL + '?q=' + name;
 
-        if (message)
+        if (message && message !== 'false')
             await fetch(process.env.CREATE_WEBHOOK_URL ?? '', {
                 method: 'POST',
                 headers: {},
