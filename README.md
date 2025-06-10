@@ -13,8 +13,8 @@ A simple API that accepts a Google Docs URL and a name, stores the mapping, and 
 ### Installation
 
 ```bash
-git clone https://github.com/yourusername/cc-pdf.git
-cd cc-pdf
+git clone https://github.com/yourusername/gcal-sync.git
+cd gcal-sync
 npm install
 ```
 
