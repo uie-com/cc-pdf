@@ -47,6 +47,7 @@ export async function GET() {
         const response = await record;
     }
 
+    return new Response('Notifications sent', { status: 200 });
 
 }
 
