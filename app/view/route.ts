@@ -1,6 +1,5 @@
-import { headers } from "next/headers"
 import { redirect } from "next/navigation";
-import { NextRequest } from "next/server"
+import { NextRequest } from "next/server";
 
 export async function GET(req: NextRequest) {
 
@@ -16,7 +15,7 @@ export async function GET(req: NextRequest) {
     name = normalizeName(name);
 
 
-    const airtableRes = await fetch(`https://api.airtable.com/v0/appq2AtsGzJm1CZJZ/tblGbefx3uho1OpkW?filterByFormula=${encodeURIComponent(`{Name} = "${name}"`)}`, {
+    let airtableRes = await fetch(`https://api.airtable.com/v0/appq2AtsGzJm1CZJZ/tblGbefx3uho1OpkW?filterByFormula=${encodeURIComponent(`{Name} = "${name}"`)}`, {
         method: 'GET',
         headers: {
             'Authorization': `Bearer ${process.env.AIRTABLE_TOKEN}`,
@@ -28,10 +27,29 @@ export async function GET(req: NextRequest) {
         console.log('[ERROR] Failed to fetch from Airtable: ' + airtableRes.status);
         redirect('https://centercentre.com/');
     }
-    const airtableData = await airtableRes.json();
+
+    let airtableData = await airtableRes.json();
     if (!airtableData.records || airtableData.records.length === 0) {
         console.log('[ERROR] No records found for doc: ' + name);
-        redirect('https://centercentre.com/');
+        const noDateName = name.substring(10, name.length);
+
+        let airtableRes = await fetch(`https://api.airtable.com/v0/appq2AtsGzJm1CZJZ/tblGbefx3uho1OpkW?filterByFormula=${encodeURIComponent(`RIGHT({Name}, LEN("${noDateName}")) = "${noDateName}"`)}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${process.env.AIRTABLE_TOKEN}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!airtableRes.ok) {
+            console.log('[ERROR] Failed to fetch from Airtable: ' + airtableRes.status);
+            redirect('https://centercentre.com/');
+        }
+        airtableData = await airtableRes.json();
+        if (!airtableData.records || airtableData.records.length === 0) {
+            console.log('[ERROR] No records found for doc: ' + noDateName);
+            redirect('https://centercentre.com/');
+        }
     }
 
     const record = airtableData.records[0];
