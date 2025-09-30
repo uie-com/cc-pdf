@@ -120,7 +120,22 @@ export async function POST(req: NextRequest) {
 
     const airtableGetData = await airtableGetRes.json();
 
-    if (airtableGetData.records && airtableGetData.records.length > 0) {
+    if (airtableGetData.records && airtableGetData.records.length > 0 && airtableGetData.records[0].fields['Docs URL'] === url) {
+        newUrl = process.env.PUBLIC_URL + '?q=' + name;
+        console.log('[POST] URL already exists for ' + name + ' at URL: ' + newUrl);
+        return new Response(JSON.stringify({ url: newUrl }), {
+            status: 200,
+            headers: {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+                'Access-Control-Allow-Headers': 'Content-Type',
+            },
+        });
+
+    } else if (airtableGetData.records && airtableGetData.records.length > 0) {
+
+
         const record = airtableGetData.records[0];
         const { id } = record;
         const airtableUpdateRes = await fetch(`https://api.airtable.com/v0/appq2AtsGzJm1CZJZ/tblGbefx3uho1OpkW/${id}`, {
