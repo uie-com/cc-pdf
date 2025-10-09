@@ -176,13 +176,13 @@ Webhooks are optional and triggered automatically when records are **created**, 
 Triggered after a new link is created.
 
 **Payload Example**
-{{backtick}}{{backtick}}{{backtick}}json
+```json
 {
   "name": "2025-06-03 Metrics Topic 4",
   "doc": "https://docs.google.com/document/d/123abc/edit",
   "url": "https://pdf.centercentre.com/view?q=2025-06-03-metrics-topic-4"
 }
-{{backtick}}{{backtick}}{{backtick}}
+```
 
 ---
 
@@ -190,13 +190,13 @@ Triggered after a new link is created.
 Triggered after a link is updated (same name, new Google Doc URL).
 
 **Payload Example**
-{{backtick}}{{backtick}}{{backtick}}json
+```json
 {
   "name": "2025-06-03 Metrics Topic 4",
   "doc": "https://docs.google.com/document/d/456def/edit",
   "url": "https://pdf.centercentre.com/view?q=2025-06-03-metrics-topic-4"
 }
-{{backtick}}{{backtick}}{{backtick}}
+```
 
 ---
 
@@ -204,13 +204,13 @@ Triggered after a link is updated (same name, new Google Doc URL).
 Triggered daily via `/notify`, once per record created today.
 
 **Payload Example**
-{{backtick}}{{backtick}}{{backtick}}json
+```json
 {
   "name": "Metrics Topic 4",
   "docLink": "https://docs.google.com/document/d/123abc/edit",
   "pdfLink": "https://pdf.centercentre.com/view?q=2025-06-03-metrics-topic-4"
 }
-{{backtick}}{{backtick}}{{backtick}}
+```
 
 **Expected Response**
 A `200 OK` acknowledgment from the receiving service is sufficient.  
