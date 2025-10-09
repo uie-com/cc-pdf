@@ -1,145 +1,166 @@
 # PDF Link Service
 
-The **PDF Link Service** generates and serves **permalinked PDFs** based on Google Docs.  
-Each PDF reflects the **latest version** of its source Google Doc whenever it’s viewed.
+The **PDF Link Service** is a lightweight web app that generates **permalinked PDFs** from Google Docs.  
+Each PDF is automatically kept up to date — whenever you open the PDF link, you see the latest version of its source document.
 
 
 ## 🧭 Overview
 
-This service converts live Google Docs into permanent PDF links that always show the most up-to-date content.
+This service provides a permanent PDF link for any Google Doc. The links act as live mirrors — instead of storing static copies, they fetch the newest version of the Google Doc and serve it as a downloadable PDF on request.
 
-- Each link corresponds to a single Google Doc.  
-- PDFs are generated dynamically whenever someone accesses the permalink.  
-- Links are stored and tracked through Airtable and announced automatically in Slack.
-
-**PDF and Doc links** are listed in the **📆 Calendar** tab of the [Programs Airtable](https://www.notion.so/Programs-209903316fdd80059f54df4f1db886da?pvs=21) and in the `#collab-notes` Slack channel.
-
-
-## 🚀 Features & Usage
-
-### Create a PDF Link
-
-- Go to [https://pdf.centercentre.com/create](https://pdf.centercentre.com/create)
-- Enter the Google Doc URL and metadata to generate a permalink.
-- Each new link sends a Slack notification to `#collab-notes`.
-
-### View a PDF Link
-
-- Open `https://pdf.centercentre.com/view?q=[PDF_ID]`  
-  Example:  
-  ```
-  https://pdf.centercentre.com/view?q=2025-06-03%20Metrics%20Topic%204
-  ```
-
-### Automatic PDF Creation
-
-- PDFs are auto-generated for any **Collab Notes Link** added to the [Programs Airtable](https://www.notion.so/Programs-209903316fdd80059f54df4f1db886da?pvs=21).  
-- They appear in the **📆 Calendar** tab and trigger a Slack notification in `#collab-notes`.
-
-### Deleting Links
-
-- Deleting a Collab Notes Link also removes its associated PDF entry.  
-- ⚠️ **Wait for the deletion confirmation in `#collab-notes` before re-adding a link**, to avoid ID conflicts.
+**Example use cases:**
+- Sharing always-fresh documentation or reports.
+- Embedding live-updating PDFs in dashboards or newsletters.
+- Automating PDF distribution workflows from collaborative documents.
 
 
-## 🧩 Developer Features
+## ✨ Features
 
-### Notify / Daily Summary
-
-Ping the endpoint below to send the daily summary of PDFs created that day:
-
-```
-GET https://pdf.centercentre.com/notify
-```
-
-This message tags everyone in `#collab-notes` with that day’s Collab Notes summary.
-
-### Create a PDF via API
-
-```
-POST https://pdf.centercentre.com/view
-```
-
-**Body parameters:**
-
-| Key | Type | Description |
-|-----|------|-------------|
-| `url` | string | Google Docs URL |
-| `name` | string | PDF ID (e.g. `2025-06-03 Metrics Topic 4`) |
-| `message` | boolean | Whether to send a Slack notification to `#pdf-links` |
+- **Dynamic PDFs** – Always up-to-date exports from linked Google Docs.
+- **Simple API** – Create and retrieve PDF links programmatically.
+- **Serverless hosting** – Runs as a Next.js app on Netlify.
+- **Automation-ready** – Works seamlessly with no database servers or manual maintenance.
 
 
-## ⚙️ How It Works
+## 🌐 How It Works
 
-The service is a **Next.js app** hosted on **Netlify**, connected to a GitHub repo for automatic deploys:  
-👉 [Netlify Project Dashboard](https://app.netlify.com/projects/uie-pdf/overview)
+1. **Create a Link**  
+   The service stores a mapping between a unique PDF ID and the corresponding Google Doc URL.
 
-### Core Logic
+2. **View the PDF**  
+   When a PDF is accessed, the service:
+   - Looks up the Google Doc by its stored ID.
+   - Generates a PDF on the fly using Google Docs’ native export feature.
+   - Streams the resulting file to the browser.
 
-1. **Creating a PDF Link**
-   - Stores `(PDF ID, Google Doc URL)` in the [Database - PDFs](https://www.notion.so/Database-PDFs-209903316fdd801992c5e4039a6f2474?pvs=21) Airtable.
-   - If an ID already exists, it overwrites the entry.
-
-2. **Viewing a PDF**
-   - Fetches the Google Doc URL from Airtable.
-   - Converts it to a direct Google Docs PDF export URL.
-   - Streams the resulting PDF back to the user.
-
-3. **Daily Summary**
-   - At 8:30 AM ET, the `/notify` endpoint collects all PDFs created today (IDs starting with today’s date) and sends a message to `#collab-notes`.
+3. **Automatic Updates**  
+   Since each view fetches directly from Google Docs, no manual updates are required. The PDF always reflects the most recent version.
 
 
-## 🔁 Integrations & Automations
+## 🚀 Quick Start
 
-The service relies on several integrations to stay in sync.
+### 1. Installation
 
-### Zapier: Generate Collab Note PDF Links
-[View the Zap](https://zapier.com/editor/299280482/published?conversationId=c5eddf5d-1b65-4586-8dd5-9c0f38ba6bdd)
-
-- Polls the [Programs - Sync Utility](https://www.notion.so/Programs-Sync-Utility-209903316fdd802b96adeeb413b0a7ff?pvs=21) Airtable for changes.  
-- On new/edited Collab Notes Links:
-  - Calls the `/view` endpoint to generate the PDF link.
-  - Saves the permalink back to Airtable.
-- If a note is deleted, it removes the matching record from both:
-  - [Database - PDFs](https://www.notion.so/Database-PDFs-209903316fdd801992c5e4039a6f2474?pvs=21)
-  - [Programs - Sync Utility](https://www.notion.so/Programs-Sync-Utility-209903316fdd802b96adeeb413b0a7ff?pvs=21)
-
-⚠️ If the cleanup lags behind a replacement, you may need to manually remove outdated entries from **Database - PDFs** to prevent incorrect summaries.
-
-### Cron Jobs
-
-A daily job managed in [Cron Jobs](https://www.notion.so/Cron-Jobs-285903316fdd80ef9cd5c5ec8827e512?pvs=21) triggers the `/notify` endpoint at **8:30 AM ET**.
-
-
-## 🧑‍💻 Local Development
-
-Clone the repository:
+Clone the repository and install dependencies:
 
 ```bash
 git clone https://github.com/uie-com/cc-pdf
 cd cc-pdf
+npm install
 ```
 
-Install dependencies and start the dev server:
+### 2. Development
+
+Run locally with:
 
 ```bash
-npm install
 npm run dev
 ```
 
-### Environment Variables
+By default, the app runs on `http://localhost:3000`.
 
-Create a `.env` file in the project root.
+### 3. Environment Variables
 
-See [the Notion documentation for the file.](https://www.notion.so/centercentre/PDF-Link-Service-21b903316fdd80dba9a2ec36af271f02?source=copy_link)
+You’ll need to configure the following environment variables in a `.env.local` file:
 
-### Deployment
+| Variable | Description |
+|-----------|-------------|
+| `AIRTABLE_TOKEN` | Access token for the Airtable database that stores PDF mappings |
+| `PUBLIC_URL` | The base URL for your local or deployed instance |
+| `CREATE_WEBHOOK_URL` | (Optional) Webhook URL to notify when a PDF is created |
+| `EDIT_WEBHOOK_URL` | (Optional) Webhook URL to notify when a PDF is edited |
+| `NOTIFY_WEBHOOK_URL` | (Optional) Webhook for daily PDF summaries |
 
-Changes are automatically deployed via **Netlify** once pushed to the main branch.  
-To publish manually or via droplet, follow [CC Droplet instructions](https://www.notion.so/CC-Droplet-285903316fdd808f9d2def5d7f44c9a8?pvs=21).
+> ⚠️ **Security note:** These values must never be committed to source control.
+
+
+## 🧠 API Reference
+
+### Create a PDF Link
+
+**Endpoint:**  
+`POST /view`
+
+**Body Parameters:**
+
+| Field | Type | Description |
+|--------|------|-------------|
+| `url` | `string` | The Google Docs URL to link |
+| `name` | `string` | A unique identifier for the PDF (e.g., `2025-06-03_Metrics_Report`) |
+| `message` | `boolean` | Optional. Whether to trigger webhook notifications |
+
+**Response:**
+Returns a JSON object containing the permalink to the new PDF.
+
+
+### View a PDF
+
+**Endpoint:**  
+`GET /view?q=<PDF_ID>`
+
+Example:  
+`https://pdf.centercentre.com/view?q=2025-06-03_Metrics_Report`
+
+Returns the live-updated PDF file corresponding to the stored document.
+
+
+## 🏗️ Architecture
+
+- **Framework:** [Next.js](https://nextjs.org/)
+- **Deployment:** [Netlify](https://www.netlify.com/)
+- **Database:** [Airtable](https://airtable.com/)
+- **PDF Source:** Google Docs Export API
+
+**Flow summary:**
+1. `POST /view` → creates or updates a link record in Airtable.  
+2. `GET /view?q=...` → fetches the Google Docs PDF export.  
+3. Optional integrations (Zapier, cron jobs, webhooks) handle automation.
+
+
+## ⚙️ Integrations
+
+The service can integrate with third-party tools for automation:
+
+- **Zapier / Make.com:** Automatically generate or update PDF links when Google Docs change.  
+- **Cron Jobs:** Schedule daily summaries or sync checks.  
+- **Slack / Email Webhooks:** Notify teams when new PDFs are generated.
+
+> These integrations are optional — the core app functions independently.
+
+
+## 💡 Example Use
+
+If you store project notes or reports in Google Docs, you can use the PDF Link Service to generate public-facing permalinks. Each link behaves like a “live PDF snapshot” — perfect for embedding in wikis, newsletters, or dashboards.
+
+Example workflow:
+1. Add your Google Doc to the system.
+2. The service returns a unique PDF permalink.
+3. Anyone with the link can open or download the always-updated PDF.
+
+
+## 🧑‍💻 Contributing
+
+Contributions are welcome!  
+To get started:
+
+1. Fork the repository.  
+2. Create a feature branch (`feature/add-new-endpoint`).  
+3. Submit a pull request once your changes are tested.
+
+Please ensure your commits are well-documented and follow conventional commit standards.
 
 
 ## 🧾 License
 
-This project is internal to **CenterCentre UIE** and intended for internal use only.  
-Do not redistribute without authorization.
+This project is maintained by **CenterCentre UIE**.  
+Released under the **MIT License**.
+
+For additional details, setup instructions, or internal integrations, see the [PDF Link Service Documentation](https://www.notion.so/) (internal access required).
+
+
+## 📚 Resources
+
+- [Next.js Documentation](https://nextjs.org/docs)
+- [Netlify Deployments](https://docs.netlify.com/)
+- [Airtable API Reference](https://airtable.com/api)
+- [Google Docs Export API](https://developers.google.com/docs/api/reference/rest)
