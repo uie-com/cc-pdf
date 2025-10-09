@@ -132,7 +132,8 @@ Example:
 
 Returns the live-updated PDF file corresponding to the stored document.
 
-### Sends summary notifications for PDFs that are marked with today's date.
+### Send a Daily Report
+Sends a summary webhook with a list of PDFs that are marked with today's date. Can be used for easy access to daily or event-specific documents. Requires document IDs begin with the format "YYYY-MM-DD".
 
 **Endpoint:**  
 `GET /notify`
