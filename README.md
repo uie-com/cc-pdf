@@ -128,7 +128,7 @@ Returns a JSON object containing the permalink to the new PDF.
 `GET /view?q=<PDF_ID>`
 
 Example:  
-`https://pdf.centercentre.com/view?q=2025-06-03_Metrics_Report`
+`https://pdf.company.com/view?q=2025-06-03_Metrics_Report`
 
 Returns the live-updated PDF file corresponding to the stored document.
 
@@ -180,7 +180,7 @@ Triggered after a new link is created.
 {
   "name": "2025-06-03 Metrics Topic 4",
   "doc": "https://docs.google.com/document/d/123abc/edit",
-  "url": "https://pdf.centercentre.com/view?q=2025-06-03-metrics-topic-4"
+  "url": "https://pdf.company.com/view?q=2025-06-03-metrics-topic-4"
 }
 ```
 
@@ -194,7 +194,7 @@ Triggered after a link is updated (same name, new Google Doc URL).
 {
   "name": "2025-06-03 Metrics Topic 4",
   "doc": "https://docs.google.com/document/d/456def/edit",
-  "url": "https://pdf.centercentre.com/view?q=2025-06-03-metrics-topic-4"
+  "url": "https://pdf.company.com/view?q=2025-06-03-metrics-topic-4"
 }
 ```
 
@@ -208,7 +208,7 @@ Triggered daily via `/notify`, once per record created today.
 {
   "name": "Metrics Topic 4",
   "docLink": "https://docs.google.com/document/d/123abc/edit",
-  "pdfLink": "https://pdf.centercentre.com/view?q=2025-06-03-metrics-topic-4"
+  "pdfLink": "https://pdf.company.com/view?q=2025-06-03-metrics-topic-4"
 }
 ```
 
