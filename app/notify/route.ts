@@ -1,4 +1,3 @@
-import { NextRequest } from "next/server";
 
 export async function GET() {
 
@@ -17,16 +16,16 @@ export async function GET() {
 
     if (!data.records || data.records.length === 0) {
         console.log('[AIRTABLE] No records found for today: ' + todayStr);
-        return new Response('No records found', { status: 404 });
+        return new Response('No records found', { status: 200 });
     }
 
     console.log(`[AIRTABLE] Found ${data.records.length} records for today: ${todayStr}`);
 
     const records = data.records.map(async (record: any) => {
         const { id, fields } = record;
-        let { 'Docs URL': docLink, Name: name, 'PDF URL': pdfLink } = fields;
+        let { 'Docs URL': doc, Name: name, 'PDF URL': url } = fields;
 
-        if (!docLink) {
+        if (!doc) {
             console.log(`[AIRTABLE] No URL found for doc: ${name}`);
             return null;
         }
@@ -39,7 +38,7 @@ export async function GET() {
                 'Authorization': `Bearer ${process.env.AIRTABLE_TOKEN}`,
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ name, docLink, pdfLink })
+            body: JSON.stringify({ name, doc, url })
         });
     });
 
