@@ -207,8 +207,8 @@ Triggered daily via `/notify`, once per record created today.
 ```json
 {
   "name": "Metrics Topic 4",
-  "docLink": "https://docs.google.com/document/d/123abc/edit",
-  "pdfLink": "https://pdf.company.com/view?q=2025-06-03-metrics-topic-4"
+  "doc": "https://docs.google.com/document/d/123abc/edit",
+  "url": "https://pdf.centercentre.com/view?q=2025-06-03-metrics-topic-4"
 }
 ```
 
