@@ -8,8 +8,10 @@ Each PDF is automatically kept up to date — whenever you open the PDF link, yo
 
 This service provides a permanent PDF link for any Google Doc. The links act as live mirrors — instead of storing static copies, they fetch the newest version of the Google Doc and serve it as a downloadable PDF on request.
 
+Google Docs will provide PDF copies of documents, but only in a custom viewer that cannot be accessed in certain environments.
+
 **Example use cases:**
-- Sharing always-fresh documentation or reports.
+- Sharing documents to government or restricted networking environments.
 - Embedding live-updating PDFs in dashboards or newsletters.
 - Automating PDF distribution workflows from collaborative documents.
 
@@ -19,7 +21,7 @@ This service provides a permanent PDF link for any Google Doc. The links act as 
 - **Dynamic PDFs** – Always up-to-date exports from linked Google Docs.
 - **Simple API** – Create and retrieve PDF links programmatically.
 - **Serverless hosting** – Runs as a Next.js app on Netlify.
-- **Automation-ready** – Works seamlessly with no database servers or manual maintenance.
+- **Automation-ready** – Works seamlessly with no manual maintenance.
 
 
 ## 🌐 How It Works
@@ -71,7 +73,34 @@ You’ll need to configure the following environment variables in a `.env.local`
 | `EDIT_WEBHOOK_URL` | (Optional) Webhook URL to notify when a PDF is edited |
 | `NOTIFY_WEBHOOK_URL` | (Optional) Webhook for daily PDF summaries |
 
-> ⚠️ **Security note:** These values must never be committed to source control.
+> ⚠️ **Reminder:** These values must never be committed to source control.
+
+## ⚙️ Architecture
+
+**Core components:**
+
+| Component | Purpose |
+|------------|----------|
+| **Next.js App** | API routes `/view` and `/notify` |
+| **Airtable Database** | Stores document mappings and metadata |
+| **Google Docs Export API** | Provides live PDF export |
+| **Webhooks** | Sends notifications to external services (e.g., Slack, email, or chat tools) |
+| **Cron Job (Optional)** | Automates daily PDF summaries |
+
+## 🧠 Airtable Schema
+
+The service relies on a single Airtable base (table) with the following fields:
+
+| Field Name | Type | Description |
+|-------------|------|-------------|
+| `Name` | **Single line text** | Unique ID for each PDF, formatted like `YYYY-MM-DD Report Title` |
+| `Docs URL` | **URL** | The full Google Docs link that will be converted to a PDF |
+| `PDF URL` | **URL** _(optional)_ | The generated permalink served by this service |
+
+**Table Behavior:**
+- The `Name` field acts as the unique key.
+- The `/view` API creates or updates records based on `Name`.
+- The `/notify` API queries for records with today’s date prefix (e.g., `2025-10-09`).
 
 
 ## 🧠 API Reference
@@ -103,6 +132,17 @@ Example:
 
 Returns the live-updated PDF file corresponding to the stored document.
 
+### Sends summary notifications for PDFs that are marked with today's date.
+
+**Endpoint:**  
+`GET /notify`
+
+**Purpose**
+- Queries Airtable for all records whose `{Name}` starts with today’s date (e.g. `2025-10-09`).  
+- Posts each record to a webhook endpoint (`NOTIFY_WEBHOOK_URL`).
+
+**Response:**
+'Notifications sent successfully' or 'No records found for today'
 
 ## 🏗️ Architecture
 
@@ -127,40 +167,66 @@ The service can integrate with third-party tools for automation:
 
 > These integrations are optional — the core app functions independently.
 
+## 🔔 Webhook Integrations
+
+Webhooks are optional and triggered automatically when records are **created**, **updated**, or **summarized**.
+
+### Create Webhook (`CREATE_WEBHOOK_URL`)
+Triggered after a new link is created.
+
+**Payload Example**
+{{backtick}}{{backtick}}{{backtick}}json
+{
+  "name": "2025-06-03 Metrics Topic 4",
+  "doc": "https://docs.google.com/document/d/123abc/edit",
+  "url": "https://pdf.centercentre.com/view?q=2025-06-03-metrics-topic-4"
+}
+{{backtick}}{{backtick}}{{backtick}}
+
+---
+
+### Edit Webhook (`EDIT_WEBHOOK_URL`)
+Triggered after a link is updated (same name, new Google Doc URL).
+
+**Payload Example**
+{{backtick}}{{backtick}}{{backtick}}json
+{
+  "name": "2025-06-03 Metrics Topic 4",
+  "doc": "https://docs.google.com/document/d/456def/edit",
+  "url": "https://pdf.centercentre.com/view?q=2025-06-03-metrics-topic-4"
+}
+{{backtick}}{{backtick}}{{backtick}}
+
+---
+
+### Notify Webhook (`NOTIFY_WEBHOOK_URL`)
+Triggered daily via `/notify`, once per record created today.
+
+**Payload Example**
+{{backtick}}{{backtick}}{{backtick}}json
+{
+  "name": "Metrics Topic 4",
+  "docLink": "https://docs.google.com/document/d/123abc/edit",
+  "pdfLink": "https://pdf.centercentre.com/view?q=2025-06-03-metrics-topic-4"
+}
+{{backtick}}{{backtick}}{{backtick}}
+
+**Expected Response**
+A `200 OK` acknowledgment from the receiving service is sufficient.  
+No retry logic is built in; use an external job monitor if reliability is required.
+
 
 ## 💡 Example Use
 
-If you store project notes or reports in Google Docs, you can use the PDF Link Service to generate public-facing permalinks. Each link behaves like a “live PDF snapshot” — perfect for embedding in wikis, newsletters, or dashboards.
+If you store project notes or reports in Google Docs, you can use the PDF Link Service to generate public-facing permalinks. Each link behaves like a “live PDF snapshot” — perfect for sharing or downloading for further automation.
 
 Example workflow:
 1. Add your Google Doc to the system.
 2. The service returns a unique PDF permalink.
 3. Anyone with the link can open or download the always-updated PDF.
 
+OR
 
-## 🧑‍💻 Contributing
-
-Contributions are welcome!  
-To get started:
-
-1. Fork the repository.  
-2. Create a feature branch (`feature/add-new-endpoint`).  
-3. Submit a pull request once your changes are tested.
-
-Please ensure your commits are well-documented and follow conventional commit standards.
-
-
-## 🧾 License
-
-This project is maintained by **CenterCentre UIE**.  
-Released under the **MIT License**.
-
-For additional details, setup instructions, or internal integrations, see the [PDF Link Service Documentation](https://www.notion.so/) (internal access required).
-
-
-## 📚 Resources
-
-- [Next.js Documentation](https://nextjs.org/docs)
-- [Netlify Deployments](https://docs.netlify.com/)
-- [Airtable API Reference](https://airtable.com/api)
-- [Google Docs Export API](https://developers.google.com/docs/api/reference/rest)
+1. A polling Zapier automation searches for new Docs links in a database
+2. It makes an API call to this service and stores the new link
+3. The database now always has a direct access link
