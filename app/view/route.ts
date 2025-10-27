@@ -57,7 +57,14 @@ export async function GET(req: NextRequest) {
 
                     console.log('[INFO] Trying alternative name: ' + newName);
 
-                    redirect(process.env.PUBLIC_URL + '?q=' + newName);
+                    airtableRes = await fetch(`https://api.airtable.com/v0/appq2AtsGzJm1CZJZ/tblGbefx3uho1OpkW?filterByFormula=${encodeURIComponent(`{Name} = "${newName}"`)}`, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${process.env.AIRTABLE_TOKEN}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
                 }
             }
         }
