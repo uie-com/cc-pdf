@@ -26,24 +26,6 @@ export async function GET(req: NextRequest) {
     if (!airtableRes.ok) {
         console.log('[ERROR] Failed to fetch from Airtable: ' + airtableRes.status);
 
-        // If ends with 'cohort-x-topic-y', swap to 'topic-y-cohort-x' and try again
-        const nameParts = name.split('-');
-        if (nameParts.length >= 4) {
-            const cohortIndex = nameParts.findIndex(part => part === 'cohort');
-            const topicIndex = nameParts.findIndex(part => part === 'topic');
-            if (cohortIndex !== -1 && topicIndex !== -1 && cohortIndex < topicIndex) {
-                const newNameParts = [...nameParts];
-                const cohortPart = newNameParts.splice(cohortIndex, 2);
-                const topicPart = newNameParts.splice(topicIndex - 2, 2);
-                newNameParts.push(...topicPart, ...cohortPart);
-                const newName = newNameParts.join('-');
-
-                console.log('[INFO] Trying alternative name: ' + newName);
-
-                redirect(process.env.PUBLIC_URL + '?q=' + newName);
-            }
-        }
-
         redirect('https://centercentre.com/');
     }
 
@@ -59,6 +41,26 @@ export async function GET(req: NextRequest) {
                 'Content-Type': 'application/json'
             }
         });
+
+        if (!airtableRes.ok) {
+            // If ends with 'cohort-x-topic-y', swap to 'topic-y-cohort-x' and try again
+            const nameParts = name.split('-');
+            if (nameParts.length >= 4) {
+                const cohortIndex = nameParts.findIndex(part => part === 'cohort');
+                const topicIndex = nameParts.findIndex(part => part === 'topic');
+                if (cohortIndex !== -1 && topicIndex !== -1 && cohortIndex < topicIndex) {
+                    const newNameParts = [...nameParts];
+                    const cohortPart = newNameParts.splice(cohortIndex, 2);
+                    const topicPart = newNameParts.splice(topicIndex - 2, 2);
+                    newNameParts.push(...topicPart, ...cohortPart);
+                    const newName = newNameParts.join('-');
+
+                    console.log('[INFO] Trying alternative name: ' + newName);
+
+                    redirect(process.env.PUBLIC_URL + '?q=' + newName);
+                }
+            }
+        }
 
         if (!airtableRes.ok) {
             console.log('[ERROR] Failed to fetch from Airtable: ' + airtableRes.status);
