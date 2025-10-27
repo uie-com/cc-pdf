@@ -41,8 +41,14 @@ export async function GET(req: NextRequest) {
                 'Content-Type': 'application/json'
             }
         });
-
         if (!airtableRes.ok) {
+            console.log('[ERROR] Failed to fetch from Airtable: ' + airtableRes.status);
+            redirect('https://centercentre.com/');
+        }
+        airtableData = await airtableRes.json();
+        if (!airtableData.records || airtableData.records.length === 0) {
+            console.log('[ERROR] No records found for doc: ' + noDateName);
+
             // If ends with 'cohort-x-topic-y', swap to 'topic-y-cohort-x' and try again
             const nameParts = name.split('-');
             if (nameParts.length >= 4) {
@@ -67,16 +73,15 @@ export async function GET(req: NextRequest) {
 
                 }
             }
-        }
-
-        if (!airtableRes.ok) {
-            console.log('[ERROR] Failed to fetch from Airtable: ' + airtableRes.status);
-            redirect('https://centercentre.com/');
-        }
-        airtableData = await airtableRes.json();
-        if (!airtableData.records || airtableData.records.length === 0) {
-            console.log('[ERROR] No records found for doc: ' + noDateName);
-            redirect('https://centercentre.com/');
+            if (!airtableRes.ok) {
+                console.log('[ERROR] Failed to fetch from Airtable: ' + airtableRes.status);
+                redirect('https://centercentre.com/');
+            }
+            airtableData = await airtableRes.json();
+            if (!airtableData.records || airtableData.records.length === 0) {
+                console.log('[ERROR] No records found for doc after alternative name: ' + name);
+                redirect('https://centercentre.com/');
+            }
         }
     }
 
